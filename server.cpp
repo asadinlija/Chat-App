@@ -15,12 +15,19 @@
 
 using namespace std;
 
+// Mapa: username -> socket (ko je trenutno online)
 map <string, SOCKET> online_users;
+// Mapa: username -> status (active/away/busy)
 map <string, UserStatus> users_status;
+// Mutexi za zaštitu zajedničkih struktura pri više threadova
 mutex status_mutex;
 mutex users_mutex;
 mutex history_mutex;
+// Fajl u koji se snima historija chata
 const string HISTORY_FILE = "chat_history.txt";
+
+// Funkcija koja snima poruku u historiju chata (u fajl).
+// Format u fajlu: timestap|sender|recipient|message
 
 void save_history(const string& sender, const string& recipient, const string& message) {
     lock_guard<mutex> lock(history_mutex);
@@ -33,6 +40,8 @@ void save_history(const string& sender, const string& recipient, const string& m
         cout << "[ERROR]: Ne mogu otvoriti history fajl!" << endl;
     }
 }
+// Funkcija koja učitava zadnjih max_lines poruka iz historije
+
 string load_history(int max_lines=50) {
     lock_guard<mutex> lock(history_mutex);
     ifstream file(HISTORY_FILE);
@@ -41,11 +50,12 @@ string load_history(int max_lines=50) {
     }
     vector<string> lines;
     string line;
-
+    // Učitavamo sve linije iz fajla u vektor
     while (getline(file, line)) {
         lines.push_back(line);
     }
     file.close();
+    // Određujemo od koje linije da počnemo
     int start = max(0, (int)lines.size()-max_lines);
     string result;
 
@@ -55,13 +65,14 @@ string load_history(int max_lines=50) {
         size_t pos3 = lines[i].find('|', pos2+1);
 
         if (pos1 == string::npos || pos2 == string::npos || pos3 == string::npos) {
-            continue;
+            continue;  // Loš format linije
         }
         string timestamp_str = lines[i].substr(0, pos1);
         string sender = lines[i].substr(pos1+1, pos2-pos1-1);
         string recipient = lines[i].substr(pos2+1, pos3-pos2-1);
         string message = lines[i].substr(pos3+1);
 
+        // Pretvaranje timestampa u HH:MM:SS format
         time_t timestamp = stoll(timestamp_str);
         char time_buf[20];
         strftime(time_buf, sizeof(time_buf), "%H:%M:%S", localtime(&timestamp));
@@ -74,11 +85,13 @@ string load_history(int max_lines=50) {
 }
 
 
-
+// Helper funkcija za slanje Packet-a na dati socket
 
 void send_packet(SOCKET sock, const Packet& paket) {
     send(sock, (char*)&paket, PACKET_SIZE, 0);
 }
+// Helper funkcija za primanje Packet-a sa datog socketa
+
 bool recv_packet(SOCKET sock, Packet& paket) {
     int bytes = recv(sock, (char*)&paket, PACKET_SIZE, 0);
     return bytes == PACKET_SIZE;
@@ -163,7 +176,7 @@ void handle_client(SOCKET client_socket) {
             case MSG_USER_LIST_REQ: {
                 if (!logged_in) break;
 
-                // Napravi listu korisnika SA statusom
+                // Pravimo listu korisnika SA statusom
                 string user_list;
                 users_mutex.lock();
                 status_mutex.lock();
@@ -323,7 +336,7 @@ void handle_client(SOCKET client_socket) {
 }
 
 int main() {
-    // 0. INICIJALIZACIJA WINSOCKA (mora prvo!)
+    // Inicijalizacija WINSOCKa
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
         cout << "WSAStartup failed\n";
@@ -338,10 +351,10 @@ int main() {
         WSACleanup();
         return 1;
     }
-    cout << "Socket kreiran\n";
+    cout << "Socket kreiran" << endl;
 
 
-    // Definisimo adresu i port
+    // Definišimo adresu i port
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(8080);
@@ -356,7 +369,7 @@ int main() {
     }
 
 
-    // Pocnemo sa slusanjem
+    // Počnemo sa slušanjem
     if (listen(server_socket, 5) == SOCKET_ERROR) {
         cout << "Greska pri slusanju: " << WSAGetLastError() << "\n";
         closesocket(server_socket);

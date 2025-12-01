@@ -4,12 +4,18 @@
 #include <cstdint>
 #include <cstring>
 
-// Message types - šta klijent/server šalju
+/*Protokol komunikacije između klijenta i servera
+Ovdje definišemo tipove poruka i osnovnu strukturu Packet
+koju koriste i server i klijent pri slanju ili primanju poruka
+*/
+
+//Status korisnika. Server čuva za svakog prijavljenog korisnika
 enum UserStatus: uint8_t {
     STATUS_ACTIVE = 0,
     STATUS_AWAY = 1,
     STATUS_BUSY = 2
 };
+//tipovi poruka koje razmjenjuju klijent i server
 enum MessageType : uint8_t {
     MSG_LOGIN = 1,           // Klijent -> Server: Login request
     MSG_LOGIN_SUCCESS = 2,   // Server -> Klijent: Login OK
@@ -48,7 +54,7 @@ struct Packet {
         payload_length = 0;
     }
 
-    // Helper: postavi payload
+    // Helper funkcija: postavi payload
     void set_payload(const char* data) {
         strncpy(payload, data, sizeof(payload) - 1);
         payload[sizeof(payload) - 1] = '\0';

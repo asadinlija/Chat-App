@@ -9,10 +9,12 @@
 
 using namespace std;
 
+//globalni socket za klijenta
 SOCKET client_socket;
+//flag sa kojim zaustavljamo glavnu petlju i thread za primanje
 bool running = true;
 
-//helper: posalji paket
+//helper funkcija: pošalji paket
 void send_packet(const Packet& packet) {
     send(client_socket, (char*)&packet, PACKET_SIZE, 0);
 }
@@ -21,7 +23,10 @@ bool recv_packet(Packet& packet) {
     int bytes = recv(client_socket, (char*)&packet, PACKET_SIZE, 0);
     return bytes == PACKET_SIZE;
 }
-//thread koji slusa poruke od servera
+/*Thread funkcija koja stalno sluša poruke od servera.
+Dok je running == true, pokušava čitati pakete i ispisivati ih na ekran
+u zavisnosti od tipa poruke.
+*/
 void receive_thread() {
     while (running) {
         Packet packet;
@@ -30,18 +35,22 @@ void receive_thread() {
             running = false;
             break;
         }
+        // Obrada poruke prema tipu
         switch (packet.type) {
             case MSG_LOGIN_SUCCESS:
                 cout << "[SERVER] " << packet.payload << endl;
                 break;
             case MSG_LOGIN_FAIL:
                 cout << "[ERROR] " << packet.payload << endl;
+                // Ako login ne uspije prekidamo klijenta
                 running = false;
                 break;
             case MSG_TEXT:
+                // Ako je recipient ALL, onda se radi o broadcast poruci
                 if (strcmp(packet.recipient, "ALL") == 0) {
                     cout << "[" << packet.sender << "]: " << packet.payload << endl;
                 } else {
+                    // inače je privatna poruka
                     cout << "[PRIVATNA PORUKA od " << packet.sender << "]: " << packet.payload << endl;
                     cout.flush();
                 }
@@ -58,6 +67,7 @@ void receive_thread() {
                 cout << "----------------------------------------------\n";
                 break;
             case MSG_STATUS_NOTIFICATION:
+                // Server javlja da je neki korisnik promijenio status
                 cout << "[SERVER] " << packet.sender << " je sada " << packet.payload << endl;
                 break;
             default:
@@ -69,19 +79,20 @@ void receive_thread() {
 
 
 int main() {
-    // 0. INICIJALIZACIJA WINSOCKA
+    // INICIJALIZACIJA WINSOCKA
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
         cout << "WSAStartup failed\n";
         return 1;
     }
+    // Kreiranje TCP socketa
     client_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (client_socket == INVALID_SOCKET) {
         cout << "Greska pri pravljenju socketa" << endl;
         WSACleanup();
         return -1;
     }
-    //server adresa
+
     string server_ip;
     cout << "Unesi IP adresu servera (ENTER za localhost): ";
     getline(cin, server_ip);
@@ -89,11 +100,12 @@ int main() {
         server_ip = "127.0.0.1";
     cout << "Konektujem se na " << server_ip << endl;
 
+    // Podešavanje server adrese
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(8080);
     inet_pton(AF_INET, server_ip.c_str(), &server_addr.sin_addr);
-//konektujemo se
+    // Pokušaj konekcije na server
 
     if (connect(client_socket, (struct sockaddr*)&server_addr, sizeof(server_addr)) == SOCKET_ERROR) {
         cout << "Connection failed. Da li je server pokrenut?" << endl;
@@ -110,8 +122,9 @@ int main() {
     login_paket.type = MSG_LOGIN;
     strncpy(login_paket.sender, username.c_str(), sizeof(login_paket.sender)-1);
     send_packet(login_paket);
+    // Pokrećemo thread koji prima poruke od servera
     thread reciever(receive_thread);
-    //cekaj malo da stigne login_success ili fail
+    //čekamo malo da stigne LOGIN_SUCCESS ili FAIL
     this_thread::sleep_for(chrono::seconds(1));
     if (!running) {
         cout << "Login nije uspio. Exiting..." << endl;
@@ -120,6 +133,7 @@ int main() {
         WSACleanup();
         return -1;
     }
+    // Ispis dostupnih komandi
     cout << "\nKomande:" << endl;
     cout << "  <poruka>           - Broadcast poruka, salje se svima" << endl;
     cout << "  /msg <user> <text>  - Privatna poruka" << endl;
@@ -128,11 +142,14 @@ int main() {
     cout << "  /status <status>      -Updateuj svoj status: active, away or busy" << endl;
     cout << "  /quit               - Exit" << endl;
     cout << endl;
+
+    //Glavna petlja klijenta: čita unos sa tastature i šalje odgovarajuće pakete
     while (running) {
         string input;
         getline(cin, input);
         if (input.empty()) continue;
         if (input == "/quit") {
+            // odjava korisnika
             Packet logout;
             logout.type = MSG_LOGOUT;
             send_packet(logout);
@@ -140,13 +157,15 @@ int main() {
             break;
         }
         else if (input == "/users") {
+            // zahtjev za listu online korisnika
             Packet req;
             req.type = MSG_USER_LIST_REQ;
             send_packet(req);
         }else if (input.substr(0,5) == "/msg ") {
+            //  privatna poruka: /msg <username> <tekst>
             size_t first_space = input.find(' ', 5);
             if (first_space == string::npos) {
-                cout << "koristi /msg <username> <message> " << endl;
+                cout << "Koristi /msg <username> <message> " << endl;
                 continue;
             }
             string recipient = input.substr(5, first_space-5);
@@ -158,16 +177,19 @@ int main() {
             strncpy(privatna_poruka.payload, message.c_str(), sizeof(privatna_poruka.payload) - 1);
             send_packet(privatna_poruka);
         }else if (input == "/history") {
+            // Zahtjev za historiju chata
             Packet req;
             req.type = MSG_HISTORY_REQ;
             send_packet(req);
 
         }else if (input.substr(0,8) == "/status ") {
+            // Promjena statusa korisnika
             string status = input.substr(8);
 
+            // Pretvaranje u lowercase
             transform(status.begin(), status.end(), status.begin(), ::tolower);
 
-            // Validacija
+            // Validacija statusa
             if (status != "active" && status != "away" && status != "busy") {
                 cout << "status moze biti <active|away|busy>" << endl;
                 continue;
@@ -180,6 +202,7 @@ int main() {
             send_packet(status_paket);
         }
         else {
+            // Sve ostalo tretiramo kao broadcast poruku
             Packet broadcast;
             broadcast.type = MSG_BROADCAST;
             strncpy(broadcast.sender, username.c_str(), sizeof(broadcast.sender) - 1);
@@ -187,7 +210,9 @@ int main() {
             send_packet(broadcast);
         }
     }
+    // Čekamo da se thread za primanje poruka završi
     reciever.join();
+    // Zatvaramo socket i čistimo Winsock
     closesocket(client_socket);
     WSACleanup();
     cout << "Diskonektovan sa servera" << endl;
