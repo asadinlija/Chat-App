@@ -84,17 +84,36 @@ string load_history(int max_lines=50) {
     return result.empty() ? "Nema jos nikakvih poruka" : result;
 }
 
+bool send_full(SOCKET s, const char* bafer, int duzina) {
+    int total = 0;
+    while (total < duzina) {
+        int bytes = send(s, bafer+total, duzina-total, 0);
+        if (bytes <= 0) return false;
+     total += bytes;
+    }
+    return true;
+}
 
 // Helper funkcija za slanje Packet-a na dati socket
 
-void send_packet(SOCKET sock, const Packet& paket) {
-    send(sock, (char*)&paket, PACKET_SIZE, 0);
+bool send_packet(SOCKET sock, const Packet& paket) {
+    return send_full(sock, reinterpret_cast<const char*>(&paket),static_cast<int>(PACKET_SIZE));
 }
+
+bool recv_full(SOCKET s, char* bafer, int duzina) {
+    int total = 0;
+    while (total < duzina) {
+        int bytes = recv(s, bafer+total, duzina-total, 0);
+        if (bytes <= 0) return false;
+        total += bytes;
+    }
+    return true;
+}
+
 // Helper funkcija za primanje Packet-a sa datog socketa
 
 bool recv_packet(SOCKET sock, Packet& paket) {
-    int bytes = recv(sock, (char*)&paket, PACKET_SIZE, 0);
-    return bytes == PACKET_SIZE;
+   return recv_full(sock, (char*)&paket, PACKET_SIZE);
 }
 
 void handle_client(SOCKET client_socket) {
@@ -111,7 +130,7 @@ void handle_client(SOCKET client_socket) {
         switch (paket.type) {
             case MSG_LOGIN: {
                 username = paket.sender;
-                //provjerim da li je username vec zauzet
+                //provjerimo da li je username vec zauzet
                 users_mutex.lock();
                 if (online_users.find(username) != online_users.end()) {
                     users_mutex.unlock();
@@ -139,6 +158,7 @@ void handle_client(SOCKET client_socket) {
                 strcpy(notifikacija.sender, "SERVER");
                 strcpy(notifikacija.recipient, "ALL");
                 string msg = username + " se pridruzio razgovoru";
+                strcpy(notifikacija.payload, msg.c_str());
                 users_mutex.lock();
                 for (auto& [user, sock]: online_users) {
                     if (user != username)

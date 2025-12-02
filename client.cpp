@@ -14,14 +14,42 @@ SOCKET client_socket;
 //flag sa kojim zaustavljamo glavnu petlju i thread za primanje
 bool running = true;
 
-//helper funkcija: pošalji paket
-void send_packet(const Packet& packet) {
-    send(client_socket, (char*)&packet, PACKET_SIZE, 0);
+bool send_full(SOCKET s, const char* buffer, int length) {
+    int total = 0;
+    while (total < length) {
+        int bytes = send(s, buffer + total, length - total, 0);
+        if (bytes <= 0) {
+            return false; // connection closed ili greška
+        }
+        total += bytes;
+    }
+    return true;
 }
-// helper funkcija da primi paket
+
+bool recv_full(SOCKET s, char* buffer, int length) {
+    int total = 0;
+    while (total < length) {
+        int bytes = recv(s, buffer + total, length - total, 0);
+        if (bytes <= 0) {
+            return false; // connection closed ili greška
+        }
+        total += bytes;
+    }
+    return true;
+}
+
+// helper: pošalji paket
+bool send_packet(const Packet& packet) {
+    return send_full(client_socket,
+                     reinterpret_cast<const char*>(&packet),
+                     static_cast<int>(PACKET_SIZE));
+}
+
+// helper: primi paket
 bool recv_packet(Packet& packet) {
-    int bytes = recv(client_socket, (char*)&packet, PACKET_SIZE, 0);
-    return bytes == PACKET_SIZE;
+    return recv_full(client_socket,
+                     reinterpret_cast<char*>(&packet),
+                     static_cast<int>(PACKET_SIZE));
 }
 /*Thread funkcija koja stalno sluša poruke od servera.
 Dok je running == true, pokušava čitati pakete i ispisivati ih na ekran
