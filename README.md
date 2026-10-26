@@ -1,45 +1,45 @@
-# TCP Chat Aplikacija
-Multi-threaded chat aplikacija sa client-server arhitekturom. Implementirana u C++ koristeći TCP socket programiranje.
+# TCP Chat Application
+A multi-threaded chat application with a client-server architecture. Implemented in C++ using TCP socket programming.
 
 
-Projekat za predmet: Mrežno programiranje
+Course project: Network Programming
 
-Datum: 28.11.2025.
-
----
-## Opis projekta
-
-Chat aplikacija koja omogućava korisnicima da komuniciraju u realnom vremenu preko TCP protokola. Server podržava istovremene konekcije koristeći multi-threading, a klijenti mogu slati broadcast i privatne poruke.
+Date: 28.11.2025.
 
 ---
-## Funkcionalnosti
+## Project Description
 
-### Osnovne funkcionalnosti
-- **Multi-client podrška** - Server handluje više klijenata istovremeno koristeći threadove
-- **User identifikacija** - Login sistem sa jedinstvenim username-ovima
-- **Broadcast poruke** - Slanje poruka svim korisnicima
-- **Private poruke** - Slanje privatnih poruka korisnicima, 1 na 1 komunikacija
-- **User lista** - Pregled online korisnika
-- **Historija poruka** - Čuvanje historije poruka u tekstualni fajl
-- **User status** - Postavljanje statusa korisnika (active/away/busy)
-- **Quit komanda** - Odjavljivanje korisnika iz chata
+A chat application that allows users to communicate in real time over the TCP protocol. The server supports simultaneous connections using multi-threading, and clients can send broadcast and private messages.
 
-### Napredne funkcionalnosti
-- **Thread-safe operacije** - Mutex za pristup dijeljenim podacima
-- **Graceful disconnect** - Pravilno handleovanje izgubljenih konekcija
-- **Join/Leave notifikacije** - Real-time notifikacije kada korisnici ulaze/izlaze
+---
+## Features
+
+### Core Features
+- **Multi-client support** - The server handles multiple clients simultaneously using threads
+- **User identification** - Login system with unique usernames
+- **Broadcast messages** - Sending messages to all users
+- **Private messages** - Sending private messages to users, 1-on-1 communication
+- **User list** - Overview of online users
+- **Message history** - Storing message history in a text file
+- **User status** - Setting the user's status (active/away/busy)
+- **Quit command** - Logging a user out of the chat
+
+### Advanced Features
+- **Thread-safe operations** - Mutexes for access to shared data
+- **Graceful disconnect** - Proper handling of lost connections
+- **Join/Leave notifications** - Real-time notifications when users join/leave
 
 ---
 
-## Tehnologije
-- **Jezik:** C++17
+## Technologies
+- **Language:** C++17
 - **Socket API:** Winsock2 (Windows)
 - **Threading:** C++ std::thread
-- **Sinhronizacija:** std::mutex, std::lock_guard
-- **File I/O:** C++ fstream (za chat historiju)
+- **Synchronization:** std::mutex, std::lock_guard
+- **File I/O:** C++ fstream (for chat history)
 - **Build System:** CMake
 
-## Struktura projekta
+## Project Structure
 
 
 ```text
@@ -51,45 +51,45 @@ mrezno_programiranje/
 ├── chat_history.txt
 └── README.md
 ```
-## Kompajliranje
+## Compilation
 
-### Preduslovi:
+### Prerequisites:
 - C++ compiler (g++, MSVC, MinGW)
-- CMake (verzija 4.0+)
-- Windows OS (za Winsock2)
+- CMake (version 4.0+)
+- Windows OS (for Winsock2)
 
-### Build instrukcije:
+### Build instructions:
 
-1. Kreirati build folder
+1. Create a build folder
 ```
 mkdir build
 cd build
 ```
-2. Generisati build fajlove
+2. Generate build files
 ```
 cmake ..
 ```
-3. Kompajlirati
+3. Compile
 ```
 cmake --build .
 ```
 
-Ili ako se koristi MinGW bez CMake-a
+Or, if using MinGW without CMake:
 ```
 g++ ../server.cpp -o server -lws2_32
 g++ ../client.cpp -o klijent -lws2_32
 ```
 
 
-## Pokretanje
+## Running
 
-Pokreni server:
+Start the server:
 
 ```
 ./server
 ```
 
-Pokreni klijent:
+Start the client:
 
 ```
 ./klijent
@@ -101,195 +101,199 @@ Pokreni klijent:
 Unesi IP adresu servera (ENTER za localhost): 
 Unesi username: alice
 ```
+(The prompts are printed by the program in Bosnian: "Enter the server IP address (ENTER for localhost)" and "Enter username".)
+
 ---
- ## Komande
+ ## Commands
  
-Dostupne komande u chatu:
+Available commands in the chat:
 
-| Komanda          | Opis                                        |
+| Command          | Description                                 |
 |------------------|---------------------------------------------|
-| `tekst_poruke`   | Pošalji poruku svim korisnicima (broadcast) |
-| `/msg user text` | Pošalji privatnu poruku korisniku           |
-| `/users`         | Prikaži listu online korisnika              |
-| `/status status` | Postavi status (active/away/busy)           |
-| `/history`       | Prikaži prethodne poruke                    |
-| `/quit`          | Izađi iz chata                              |
+| `message_text`   | Send a message to all users (broadcast)     |
+| `/msg user text` | Send a private message to a user            |
+| `/users`         | Show the list of online users               |
+| `/status status` | Set status (active/away/busy)               |
+| `/history`       | Show previous messages                      |
+| `/quit`          | Leave the chat                              |
 
 ---
 
-## Testiranje na lokalnoj mreži
+## Testing on a Local Network
 
-### Korak 1: Naći IP adresu server računara
+### Step 1: Find the IP address of the server computer
 
-U CMD ukucati:
+In CMD, type:
 ```
 ipconfig
 ```
 
-Primjer outputa:
+Example output:
 
 IPv4 Address. . . . . . . . . . . : 192.168.1.108
 
-### Korak 2: Omogućiti port u firewall-u (8080)
+### Step 2: Allow the port in the firewall (8080)
 
-### Korak 3: Pokrenuti server na jednom računaru
+### Step 3: Start the server on one computer
 
-### Korak 4: Klijenti se konektuju sa drugih računara 
+### Step 4: Clients connect from other computers
 
 ```
 ./klijent
 
-Unesi IP adresu servera (ENTER za localhost): 192.168.1.108    # IP adresa server računara
+Unesi IP adresu servera (ENTER za localhost): 192.168.1.108    # IP address of the server computer
 ```
 
 ---
 
-## Arhitektura sistema
+## System Architecture
 
-Sistem je zasnovan na client-server arhitekturi preko TCP protokola.
+The system is based on a client-server architecture over the TCP protocol.
 
-Jedan centralni server održava listu aktivnih korisnika, njihove statuse i historiju poruka, dok se više klijenata istovremeno spaja na taj server i razmjenjuje poruke u realnom vremenu.
+A single central server maintains the list of active users, their statuses, and the message history, while multiple clients connect to that server simultaneously and exchange messages in real time.
 
-Glavne komponente su:
- - Server (server.cpp) - obrađuje sve klijente, poruke, statuse i historiju
- - Klijent (client.cpp) - omogućava korisniku da se spoji na server, šalje komande i prima poruke
- - Protokol (protocol.h) - zajedničke definicije strukture Packet i tipova poruka
+The main components are:
+ - Server (server.cpp) - handles all clients, messages, statuses, and history
+ - Client (client.cpp) - lets the user connect to the server, send commands, and receive messages
+ - Protocol (protocol.h) - shared definitions of the Packet structure and message types
 
 ### Server
-Server je implementiran kao multi-threaded TCP server. Koristi:
- - koristi Winsock2 za mrežnu komunikaciju
- - sluša na portu 8080 na svim interfejsima (INADDR_ANY)
- - za svakog novog klijenta poziva accept() i pokreće poseban thread funkcije handle_client
- - koristi globalne mape za stanje sistema:
-    - map<string, SOCKET> online_users (aktivni korisnici i njihovi socketi) 
-    - map<string, UserStatus> users_status (status svakog korisnika)
-- koristi std::mutex za zaštitu:
-    - pristupa listi korisnika
-    - pristupa statusima
-    - pristupa fajlu sa historijom
-Glavne odgovornosti servera:
-    - obrada login zahtjeva i provjera zauzetosti username-a
-    - slanje broadcast poruka svim korisnicima osim pošiljaoca
-    - slanje privatnih poruka ciljnom korisniku
-    - vraćanje liste korisnika sa statusima
-    - čuvanje i slanje historije chata iz fajla chat_history.txt
-    - ažuriranje i broadcast statusa korisnika (active/away/busy)
-    - slanje join/leave notifikacija ostalim korisnicima kada se neko uloguje/odloguje
+The server is implemented as a multi-threaded TCP server. It:
+ - uses Winsock2 for network communication
+ - listens on port 8080 on all interfaces (INADDR_ANY)
+ - calls accept() for each new client and starts a separate thread running the handle_client function
+ - uses global maps for system state:
+    - map<string, SOCKET> online_users (active users and their sockets)
+    - map<string, UserStatus> users_status (status of each user)
+- uses std::mutex to protect:
+    - access to the user list
+    - access to the statuses
+    - access to the history file
+
+Main responsibilities of the server:
+    - processing login requests and checking whether a username is taken
+    - sending broadcast messages to all users except the sender
+    - sending private messages to the target user
+    - returning the list of users with their statuses
+    - storing and sending the chat history from the chat_history.txt file
+    - updating and broadcasting user statuses (active/away/busy)
+    - sending join/leave notifications to other users when someone logs in/out
 
 ---
 
-### Klijent
-Klijent je konzolna aplikacija koja:
- - uspostavlja TCP konekciju ka serveru
- - od korisnika traži username i šalje MSG_LOGIN paket serveru
- - pokreće poseban thread za prijem poruka (receive_thread), koji kontinuirano prima pakete od servera i ispisuje ih na ekran
- - u glavnoj niti čita korisnički unos i prevodi tekst u odgovarajuće pakete
-Podržane komande u klijentu:
- - bilo koja poruka bez prefiksa / - broadcast poruka svima (tip MSG_BROADCAST)
- - /msg <user> <tekst> - privatna poruka (tip MSG_PRIVATE)
- - /users - zahtjev za listu korisnika (tip MSG_USER_LIST_REQ)
- - /history - zahtjev za historiju (tip MSG_HISTORY_REQ)
- - /status <active|away|busy> - promjena statusa (tip MSG_STATUS_CHANGE)
- - /quit - odjava (tip MSG_LOGOUT)
+### Client
+The client is a console application that:
+ - establishes a TCP connection to the server
+ - asks the user for a username and sends a MSG_LOGIN packet to the server
+ - starts a separate thread for receiving messages (receive_thread), which continuously receives packets from the server and prints them to the screen
+ - reads user input in the main thread and translates the text into the appropriate packets
+
+Commands supported by the client:
+ - any message without the / prefix - broadcast message to everyone (type MSG_BROADCAST)
+ - /msg <user> <text> - private message (type MSG_PRIVATE)
+ - /users - request for the user list (type MSG_USER_LIST_REQ)
+ - /history - request for the history (type MSG_HISTORY_REQ)
+ - /status <active|away|busy> - status change (type MSG_STATUS_CHANGE)
+ - /quit - logout (type MSG_LOGOUT)
 
 ---
 
-### Tok komunikacije
+### Communication Flow
 
-1. Pokretanje servera
-   - Server inicijalizuje Winsock, kreira socket, binduje se na port 8080 i poziva listen()
-2. Priključivanje klijenta
-   - Klijent kreira socket, poziva connect() ka serveru i šalje MSG_LOGIN sa zadanim username-om
+1. Starting the server
+   - The server initializes Winsock, creates a socket, binds to port 8080, and calls listen()
+2. Client connection
+   - The client creates a socket, calls connect() to the server, and sends MSG_LOGIN with the chosen username
 3. Login
-   - Server provjerava da li username već postoji u online_users
-   - Ako postoji, šalje MSG_LOGIN_FAIL i prekida konekciju
-   - Ako nije zauzet, dodaje korisnika u mapu, postavlja status na STATUS_ACTIVE i šalje MSG_LOGIN_SUCCESS, te broadcastuje ostalim da se novi korisnik pridružio
-4. Razmjena poruka
-   - Broadcast poruke se šalju svim ostalim korisnicima kao MSG_TEXT sa recipient = ALL
-   - Privatne poruke se šalju samo ciljnom korisniku sa recipient = <username>
-   - Sve poruke se snimaju u fajl historije preko save_history
-5. Status i lista korisnika
-   - /status ... šalje MSG_STATUS_CHANGE
-6. Historija
-   - /history - klijent šalje MSG_HISTORY_REQ, server učitava zadnjih 50 poruka iz chat_history.txt i vraća ih kao jedan MSG_HISTORY paket.
-7. Odjava
-   - /quit šalje MSG_LOGOUT. Server uklanja korisnika iz online_users i users_status, te šalje ostalima notifikaciju da je korisnik napustio chat.
-   - Ako konekcija pukne, server detektuje recv fail i radi isto čišćenje u cleanup dijelu
+   - The server checks whether the username already exists in online_users
+   - If it exists, it sends MSG_LOGIN_FAIL and closes the connection
+   - If it is not taken, it adds the user to the map, sets the status to STATUS_ACTIVE, sends MSG_LOGIN_SUCCESS, and broadcasts to the others that a new user has joined
+4. Message exchange
+   - Broadcast messages are sent to all other users as MSG_TEXT with recipient = ALL
+   - Private messages are sent only to the target user with recipient = <username>
+   - All messages are saved to the history file via save_history
+5. Status and user list
+   - /status ... sends MSG_STATUS_CHANGE
+6. History
+   - /history - the client sends MSG_HISTORY_REQ, and the server loads the last 50 messages from chat_history.txt and returns them as a single MSG_HISTORY packet.
+7. Logout
+   - /quit sends MSG_LOGOUT. The server removes the user from online_users and users_status, and notifies the others that the user has left the chat.
+   - If the connection drops, the server detects a recv failure and performs the same cleanup in the cleanup section
 
 
-### Dizajn protokola
+### Protocol Design
 
-#### Osnovna struktura paketa
-Sav saobraćaj između klijenta i servera ide kroz fiksnu strukturu Packet definisanu u protocol.h
+#### Basic Packet Structure
+All traffic between the client and the server goes through a fixed Packet structure defined in protocol.h
 ```
 struct Packet {
-uint8_t type;           // Tip poruke 
-char sender[32];        // Ko šalje (username)
-char recipient[32];     // Kome (username ili "ALL" za broadcast)
-uint16_t payload_length; // Dužina payload-a
-char payload[512];      // Sadržaj poruke
+uint8_t type;           // Message type
+char sender[32];        // Who is sending (username)
+char recipient[32];     // To whom (username or "ALL" for broadcast)
+uint16_t payload_length; // Payload length
+char payload[512];      // Message content
 };
 ```
 
-#### Ključne ideje dizajna
- - Fiksna veličina (PACKET_SIZE = sizeof(Packet)) - pojednostavljuje send/recv, tj. uvijek šaljemo/primamo istu količinu bajtova
- - Polja sender i recipient uvijek putuju unutar paketa, pa server ne mora dodatno mapirati (socket, username) pri broadcastu.
- - payload služi kao univerzalni tekstualni sadržaj: poruka, lista korisnika, historija, opis greške, novi status itd.
+#### Key Design Ideas
+ - Fixed size (PACKET_SIZE = sizeof(Packet)) - simplifies send/recv, i.e. we always send/receive the same number of bytes
+ - The sender and recipient fields always travel inside the packet, so the server does not need to additionally map (socket, username) when broadcasting.
+ - payload serves as universal text content: a message, user list, history, error description, new status, etc.
 
-### Tipovi poruka:
+### Message Types:
 
-- MSG_LOGIN - Login request (klijent -> server)
-- MSG_LOGIN_SUCCESS - Potvrda da je login uspio (server -> klijent)
-- MSG_LOGIN_FAIL - vraća poruku greške kada je username već u upotrebi (server -> klijent)
-- MSG_BROADCAST - Broadcast poruka (klijent -> server)
-- MSG_PRIVATE - Privatna poruka (klijent -> server)
-- MSG_USER_LIST_REQ - Zahtjev za listu korisnika (klijent -> server)
-- MSG_USER_LIST - payload sadrži listu korisnika i njihovih statusa (server -> klijent)
-- MSG_HISTORY - payload sadrži formatiranu historiju (server -> klijent)
-- MSG_HISTORY_REQ - Zahtjev za historiju chata (klijent -> server)
-- MSG_STATUS_CHANGE - Promjena statusa (klijent -> server)
-- MSG_LOGOUT - signal da se korisnik svjesno odjavljuje (klijent -> server)
-- MSG_TEXT - opšta tekstualna poruka prema klijentima (server -> klijent)
-- MSG_ERROR - sadrži opis greške (server -> klijent)
-- MSG_STATUS_NOTIFICATION - server obavješava sve ostale klijente da je određeni korisnik promijenio status. (server -> klijent)
+- MSG_LOGIN - Login request (client -> server)
+- MSG_LOGIN_SUCCESS - Confirmation that the login succeeded (server -> client)
+- MSG_LOGIN_FAIL - returns an error message when the username is already in use (server -> client)
+- MSG_BROADCAST - Broadcast message (client -> server)
+- MSG_PRIVATE - Private message (client -> server)
+- MSG_USER_LIST_REQ - Request for the user list (client -> server)
+- MSG_USER_LIST - payload contains the list of users and their statuses (server -> client)
+- MSG_HISTORY - payload contains the formatted history (server -> client)
+- MSG_HISTORY_REQ - Request for the chat history (client -> server)
+- MSG_STATUS_CHANGE - Status change (client -> server)
+- MSG_LOGOUT - signal that the user is deliberately logging out (client -> server)
+- MSG_TEXT - general text message to clients (server -> client)
+- MSG_ERROR - contains an error description (server -> client)
+- MSG_STATUS_NOTIFICATION - the server notifies all other clients that a given user has changed status. (server -> client)
 
 ---
 
-## Problemi koji se mogu desiti i rješenja
+## Possible Problems and Solutions
 
-### Problem: "Connection failed. Da li je server pokrenut?"
-**Uzrok:** Server nije pokrenut ili radi na drugom portu.
+### Problem: "Connection failed. Da li je server pokrenut?" ("...Is the server running?")
+**Cause:** The server is not running or is running on a different port.
 
-**Rješenje:** 
-- Pokrenuti server.exe prije klijenta.
-- Provjeriti da port 8080 nije zauzet od drugog procesa
-- Provjeriti firewall (privremeno ga isključiti ili dozvoliti aplikaciju).
+**Solution:**
+- Start server.exe before the client.
+- Check that port 8080 is not in use by another process
+- Check the firewall (temporarily disable it or allow the application).
 
 
-### Problem: Server javlja: "Error binding socket: 10048"
-**Uzrok:** Port 8080 je već zauzet.
+### Problem: Server reports: "Error binding socket: 10048"
+**Cause:** Port 8080 is already in use.
 
-**Rješenje:** U CMD upisati: 
+**Solution:** In CMD, type:
 ```
 netstat -ano | findstr :8080
 ```
-Pronaći PID procesa i ugasiti ga
+Find the process PID and terminate it
 
 ```
 taskkill /PID <pid> /F
 ```
 ---
 
-### Principi Mrežnog programiranja koji su demonstrirani
+### Network Programming Principles Demonstrated
 
-Projekat demonstrira sljedeće principe:
-1. **Socket programiranje** - kreiranje i upravljanje mrežnim socketima (socket, bind, listen, accept, connect)
-2. **TCP protokol** - pouzdani protokol komunikacije, orijentisan na konekciju koji obezbjeđuje redoslijed, potvrde i isporuku podataka bez gubitaka
-3. **Client-Server arhitektura** - centralizovani server model
-4. **Konkurentnost** - server može istovremeno obrađivati više klijenata korištenjem multi-threadinga gdje svaki klijent dobija sopstvenu nit izvršavanja
-5. **Sinhronizacija** - std::mutex i std::lock_guard osiguravaju thread-safe pristup zajedničkim strukturama (lista korisnika, statusi, historija)
+The project demonstrates the following principles:
+1. **Socket programming** - creating and managing network sockets (socket, bind, listen, accept, connect)
+2. **TCP protocol** - a reliable, connection-oriented communication protocol that ensures ordered, acknowledged, and lossless data delivery
+3. **Client-server architecture** - a centralized server model
+4. **Concurrency** - the server can handle multiple clients simultaneously using multi-threading, where each client gets its own thread of execution
+5. **Synchronization** - std::mutex and std::lock_guard ensure thread-safe access to shared structures (user list, statuses, history)
 
-### Autor
+### Author
 
 Amina Šadinlija
 
